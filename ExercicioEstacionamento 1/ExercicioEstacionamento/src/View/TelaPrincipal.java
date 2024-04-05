@@ -310,7 +310,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
                             .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(cboxMetricaCalculo, 0, 1, Short.MAX_VALUE)
+                            .addComponent(cboxMetricaCalculo, 0, 209, Short.MAX_VALUE)
                             .addComponent(txtbValorEstacionamento, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addComponent(btoFinalizar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
@@ -512,28 +512,44 @@ public class TelaPrincipal extends javax.swing.JFrame {
         File selFile = fc.getSelectedFile();
 
         try {
-            Serializador.gravar(selFile.getAbsolutePath(), controle.listaVeiculosCadastrados());
-        } catch (Exception ex) {
+            controle.salvar(selFile.getAbsolutePath());
+            
+            //implementar uma lista de placas que direcione os valores ao cboxVeiculos. Isto fará com que as placas sejam carregadas adequadamente
+            //no cboxVeiculos, ao mesmo tempo que será carregado a tabela.
+            //carregaPlaca estará em controle
+            //depois é necessário atribuir a lista de placas ao cboxVeiculos.
+        } catch (IOException ex) {
             Logger.getLogger(TelaPrincipal.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
     private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
-        try {
-            String filename = File.separator;
-            JFileChooser fc = new JFileChooser(new File(filename));
-            fc.showOpenDialog(jPanel1);
-            File selFile = fc.getSelectedFile();
-            
 
-            Serializador.ler(selFile.getAbsolutePath());
+        String filename = File.separator;
+        JFileChooser fc = new JFileChooser(new File(filename));
+        fc.showOpenDialog(jPanel1);
+        File selFile = fc.getSelectedFile();
+
+        try {
+
+            controle.ler(selFile.getAbsolutePath());
+            controle.carregaPlaca();
             atualizaListaVeiculos();
+            
+            for(int i = 0; i < controle.carregaPlaca().size(); i++){
+                cboxVeiculos.addItem(controle.carregaPlaca().get(i));
+            }
+            
+            
+            
         } catch (IOException ex) {
             Logger.getLogger(TelaPrincipal.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(TelaPrincipal.class.getName()).log(Level.SEVERE, null, ex);
         }
+        atualizaListaVeiculos();
+    
     }//GEN-LAST:event_jMenuItem2ActionPerformed
 
 

@@ -10,8 +10,9 @@ public class Calculo15Minutos implements CalculoValor , Serializable{
         //Periodo de tempo padrão em milisegundo para o calculo do valor = 15min * 60s * 1000mS
         long tempoPadrao= 15*60*1000;
         double valorDiaria=veiculo.getTipo().quinzeMinutos;
+        double aux = valorDiaria * (periodo / tempoPadrao);
         
-        return valorDiaria * Math.ceil(periodo / tempoPadrao);
+        return aux;
     }
     
 }
