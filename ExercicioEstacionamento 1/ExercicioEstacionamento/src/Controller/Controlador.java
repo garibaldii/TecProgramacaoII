@@ -26,6 +26,8 @@ public class Controlador {
     public void addContaVeiculo(String nome, String placa, TipoVeiculoEnum tipo) throws Exception {
         //listaVeiculos.add(new ContaVeiculo(Calendar.getInstance().getTimeInMillis(), new Veiculo(nome, placa, tipo)));
         listaVeiculos.add(new ContaVeiculo(Calendar.getInstance().getTimeInMillis() - (1000 * 60 * 60 * 2), new Veiculo(nome, placa, tipo)));
+        PersistenciaDados persistenciaDados = new PersistenciaDados();
+        persistenciaDados.criarNovoRegistro(new ContaVeiculo(Calendar.getInstance().getTimeInMillis() - (1000 * 60 * 60 * 2), new Veiculo(nome, placa, tipo)));
 
         
         
@@ -34,7 +36,9 @@ public class Controlador {
     }
 
     public void salvar(String caminho) throws IOException {
-        Serializador.gravar(caminho, listaVeiculos);
+  Serializador.gravar(caminho, listaVeiculos);
+        
+        
     }
 
     
@@ -136,7 +140,6 @@ public class Controlador {
         } else if (metrica.equals(metrica.AUTOMATICO)) {
             return automatico(placaVeiculo);
 
-            //retorna o menor valor entre os demais, pensei em adicionar os valores a uma lista temporária e retornar o menor entre eles.
         }
 
         return "deu ruim";
