@@ -39,61 +39,6 @@ public class PersistenciaDados {
         }
     }
 
-    public boolean criarNovoRegistroConta(ContaVeiculo elemento) {
-        String sql = "INSERT INTO contas(placa, inicio, fim) VALUES(?,?,?)";
-        try {
-            PreparedStatement stmt = connection.prepareStatement(sql);
-            stmt.setString(1, elemento.getVeiculo().getPlaca());
-            stmt.setLong(2, elemento.getInicio());
-            stmt.setLong(3, elemento.getFim());
-            stmt.execute();
-            return true;
-        } catch (SQLException ex) {
-            Logger.getLogger(PersistenciaDados.class.getName()).log(Level.SEVERE, null, ex);
-            return false;
-        }
-
-    }
-
-    public boolean criarNovoRegistroVeiculo(Veiculo elemento) {
-
-        if (!ehVeiculoCadastrado(elemento.getPlaca())) {
-            String sql = "INSERT INTO veiculos(placa, tipo, nome) VALUES(?,?,?)";
-            try {
-                PreparedStatement stmt = connection.prepareStatement(sql);
-                stmt.setString(1, elemento.getPlaca());
-                stmt.setString(2, elemento.getTipo().toString());
-                stmt.setString(3, elemento.getNome());
-                stmt.execute();
-                return true;
-            } catch (SQLException ex) {
-                Logger.getLogger(PersistenciaDados.class.getName()).log(Level.SEVERE, null, ex);
-                return false;
-            }
-        }
-        return false;
-    }
-
-    public boolean ehVeiculoCadastrado(String placa) {
-        String sql = "SELECT placa FROM veiculos";
-
-        try {
-            PreparedStatement stmt = connection.prepareStatement(sql);
-            ResultSet resultado = stmt.executeQuery();
-            while (resultado.next()) {
-                //Veiculo veiculo = new Veiculo(resultado.getString("nome"), resultado.getString("placa"), TipoEnumVeiculo.valueOf(resultado.getString("tipo"));
-                
-                if (resultado.getString("placa").equals(placa)) {
-                    //if (veiculo.getPlaca().equals(placa){
-                    return true;
-                }
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(PersistenciaDados.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return false;
-    }
-
     public boolean salvarBackupLocal(List<ContaVeiculo> listaRegistros) throws Exception {
         //Cria um novo arquivo de backup da lista de registros de ContaEstacionamento       
         gravarBackup(caminhoPadrao + "backup" + countBackup + ".dat", listaRegistros);

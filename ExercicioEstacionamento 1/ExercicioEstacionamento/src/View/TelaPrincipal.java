@@ -1,6 +1,7 @@
 package View;
 
 import Controller.*;
+import Model.Estacionamento.ContaVeiculo;
 import Model.Estacionamento.MetricaCalculoEnum;
 import Model.Estacionamento.Serializador;
 import Model.Estacionamento.TipoVeiculoEnum;
@@ -8,6 +9,8 @@ import Model.Estacionamento.Veiculo;
 import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.List;
+import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ComboBoxModel;
@@ -15,6 +18,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
 public class TelaPrincipal extends javax.swing.JFrame {
 
@@ -25,7 +29,36 @@ public class TelaPrincipal extends javax.swing.JFrame {
         controle = new Controlador();
         relogio();
         atualizaListaVeiculos();
+        carregaContasVeiculosBD();
         inicializaComponentes();
+    }
+
+    private void carregaContasVeiculosBD() {
+        try {
+
+            String[] colunas = new String[]{"Veiculo", "Placa", "Tipo", "Data Entrada", "Data Saída", "Status"};
+
+            DefaultTableModel tabela = new DefaultTableModel(controle.listaVeiculosCadastrados(), colunas);
+
+            List<ContaVeiculo> contaVeiculoBD = controle.pegaContasCadastradasBD();
+
+            for (ContaVeiculo conta : contaVeiculoBD) {
+                tabela.addRow(new Object[]{
+                    conta.getVeiculo().getNome(),
+                    conta.getVeiculo().getPlaca(),
+                    conta.getVeiculo().getTipo(),
+                    conta.getInicio(),
+                    conta.getFim(),
+                    conta.getStatus()
+                });
+                cboxVeiculos.addItem(conta.getVeiculo().getPlaca()); //atualiza o cboxVeiculos com os dados já cadastrados do BD
+            }
+
+            jTable1.setModel(tabela);
+            
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(rootPane, e.getMessage());
+        }
     }
 
     private void inicializaComponentes() {
@@ -54,8 +87,11 @@ public class TelaPrincipal extends javax.swing.JFrame {
     private void atualizaListaVeiculos() {
 
         try {
+
             String[] colunas = new String[]{"Veiculo", "Placa", "Tipo", "Data Entrada", "Data Saída", "Status"};
+
             DefaultTableModel tabela = new DefaultTableModel(controle.listaVeiculosCadastrados(), colunas);
+
             jTable1.setModel(tabela);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(rootPane, e.getMessage());
@@ -438,6 +474,9 @@ public class TelaPrincipal extends javax.swing.JFrame {
 
             controle.addContaVeiculo(txtbNomeVeiculo.getText(), txtbPlacaVeiculoEntrada.getText(), tipoSelecionado);
             atualizaListaVeiculos();
+
+            
+
             cboxVeiculos.addItem(txtbPlacaVeiculoEntrada.getText());
         } catch (Exception e) {
             JOptionPane.showMessageDialog(rootPane, e.getMessage());
@@ -513,7 +552,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
 
         try {
             controle.salvar(selFile.getAbsolutePath());
-            
+
             //implementar uma lista de placas que direcione os valores ao cboxVeiculos. Isto fará com que as placas sejam carregadas adequadamente
             //no cboxVeiculos, ao mesmo tempo que será carregado a tabela.
             //carregaPlaca estará em controle
@@ -536,20 +575,18 @@ public class TelaPrincipal extends javax.swing.JFrame {
             controle.ler(selFile.getAbsolutePath());
             controle.carregaPlaca();
             atualizaListaVeiculos();
-            
-            for(int i = 0; i < controle.carregaPlaca().size(); i++){
+
+            for (int i = 0; i < controle.carregaPlaca().size(); i++) {
                 cboxVeiculos.addItem(controle.carregaPlaca().get(i));
             }
-            
-            
-            
+
         } catch (IOException ex) {
             Logger.getLogger(TelaPrincipal.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(TelaPrincipal.class.getName()).log(Level.SEVERE, null, ex);
         }
         atualizaListaVeiculos();
-    
+
     }//GEN-LAST:event_jMenuItem2ActionPerformed
 
 

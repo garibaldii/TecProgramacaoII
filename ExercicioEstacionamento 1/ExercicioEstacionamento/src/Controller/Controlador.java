@@ -16,6 +16,8 @@ public class Controlador {
     private List<ContaVeiculo> listaVeiculos;
     private Thread t0, t1;
     private PersistenciaDados DAO;
+    private VeiculoDAO veiculoDAO = new VeiculoDAO();
+    private ContaVeiculoDAO contaVeiculoDAO = new ContaVeiculoDAO();
 
     public Controlador() {
         listaVeiculos = new ArrayList<ContaVeiculo>();
@@ -25,11 +27,10 @@ public class Controlador {
 
     public void addContaVeiculo(String nome, String placa, TipoVeiculoEnum tipo) throws Exception {
         //listaVeiculos.add(new ContaVeiculo(Calendar.getInstance().getTimeInMillis(), new Veiculo(nome, placa, tipo)));
-        listaVeiculos.add(new ContaVeiculo(Calendar.getInstance().getTimeInMillis() - (1000 * 60 * 60 * 2), new Veiculo(nome, placa, tipo)));
-        PersistenciaDados persistenciaDados = new PersistenciaDados();
-        
-        persistenciaDados.criarNovoRegistroVeiculo(new Veiculo(nome, placa, tipo));
-        persistenciaDados.criarNovoRegistroConta(new ContaVeiculo(Calendar.getInstance().getTimeInMillis() - (1000 * 60 * 60 * 2), new Veiculo(nome, placa, tipo)));
+        listaVeiculos.add(new ContaVeiculo(Calendar.getInstance().getTimeInMillis() - (1000 * 60 * 60 * 2), new Veiculo(nome, placa, tipo), StatusConta.ABERTO));
+
+        veiculoDAO.criarNovoRegistroVeiculo(new Veiculo(nome, placa, tipo));
+        contaVeiculoDAO.criarNovoRegistroConta(new ContaVeiculo(Calendar.getInstance().getTimeInMillis() - (1000 * 60 * 60 * 2), new Veiculo(nome, placa, tipo), StatusConta.ABERTO));
 
     }
 
@@ -40,10 +41,22 @@ public class Controlador {
 
     public void ler(String caminho) throws IOException, FileNotFoundException, ClassNotFoundException {
         listaVeiculos = (List<ContaVeiculo>) Serializador.ler(caminho);
+    }
 
+    public List<ContaVeiculo> pegaContasCadastradasBD() {
+        List<ContaVeiculo> listaContaBD = contaVeiculoDAO.listarContas();
+
+        for (ContaVeiculo conta : listaContaBD) {
+            listaVeiculos.add(conta);
+        }
+        return listaVeiculos;
     }
 
     public String[][] listaVeiculosCadastrados() throws Exception {
+        //está renderizando a lista do bd - ok. Porém toda vez que o form é preenchido, TODA a lista do bd é renderizada novamente,
+        //o que acontece? pegaContasCadastradasBD atualiza o tamanho de listaVeiculos, ele soma os registros do bd com a lista local. 
+        //listaVeiculosCadastrados percorre a listaVeiculos. Se o método pegaContasCadastradasBD estiver presente no listaVeiculosCadastrados, a lista do bd será renderizada toda vez que o método for executado.
+        //o que precisamos: que os itens do bd sejam renderizados apenas uma vez(ao iniciar o app) e exiba somente o item que acabou de ser adicionado e não TODA LISTA. 
 
         String[][] aux = new String[listaVeiculos.size()][6];
         ContaVeiculo conta;
@@ -53,10 +66,9 @@ public class Controlador {
             aux[i][0] = conta.getVeiculo().getNome();
             aux[i][1] = conta.getVeiculo().getPlaca();
             aux[i][2] = conta.getVeiculo().getTipo().toString();
-            dataAux = new Date(conta.getInicio());
-            aux[i][3] = dataAux.toString();
-            dataAux = new Date(conta.getFim());
-            aux[i][4] = dataAux.toString();
+//            dataAux = new Date(conta.getInicio());
+            aux[i][3] = Long.toString(conta.getInicio());
+            aux[i][4] = Long.toString(conta.getFim());
             aux[i][5] = conta.getStatus().toString();
         }
         return aux;
@@ -79,10 +91,12 @@ public class Controlador {
             // if(conta.valorConta().equals(0)){
             // System.out.println("Erro");
             //}
-            if (placa.equals(placaVeiculo)) {
+            if (placa.equals(placaVeiculo.toString())) {
                 conta.setStatus(StatusConta.FECHADO);
                 conta.setFim(Calendar.getInstance().getTimeInMillis());
             }
+
+            contaVeiculoDAO.atualizarContas((String) placaVeiculo);
 
         }
 

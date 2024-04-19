@@ -11,10 +11,11 @@ public class ContaVeiculo implements Serializable{
     private long fim=0;
     private StatusConta status; 
     
-    public ContaVeiculo(long inicio, Veiculo veiculo){
+    public ContaVeiculo(long inicio, Veiculo veiculo, StatusConta status){
         this.inicio=inicio;
         this.veiculo=veiculo;
-        status= StatusConta.ABERTO;
+//        status= StatusConta.ABERTO;
+        this.status = status;
     }
     
     private double valorConta() {
