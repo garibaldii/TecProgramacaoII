@@ -27,40 +27,22 @@ public class Controlador {
         //listaVeiculos.add(new ContaVeiculo(Calendar.getInstance().getTimeInMillis(), new Veiculo(nome, placa, tipo)));
         listaVeiculos.add(new ContaVeiculo(Calendar.getInstance().getTimeInMillis() - (1000 * 60 * 60 * 2), new Veiculo(nome, placa, tipo)));
         PersistenciaDados persistenciaDados = new PersistenciaDados();
-        persistenciaDados.criarNovoRegistro(new ContaVeiculo(Calendar.getInstance().getTimeInMillis() - (1000 * 60 * 60 * 2), new Veiculo(nome, placa, tipo)));
+        
+        persistenciaDados.criarNovoRegistroVeiculo(new Veiculo(nome, placa, tipo));
+        persistenciaDados.criarNovoRegistroConta(new ContaVeiculo(Calendar.getInstance().getTimeInMillis() - (1000 * 60 * 60 * 2), new Veiculo(nome, placa, tipo)));
 
-        
-        
-        
-        
     }
 
     public void salvar(String caminho) throws IOException {
-  Serializador.gravar(caminho, listaVeiculos);
-        
-        
+        Serializador.gravar(caminho, listaVeiculos);
+
     }
 
-    
-    
-    
-    
-    
     public void ler(String caminho) throws IOException, FileNotFoundException, ClassNotFoundException {
         listaVeiculos = (List<ContaVeiculo>) Serializador.ler(caminho);
 
     }
 
-    
-    
-  
-    
-    
-    
-    
-    
-    
-    
     public String[][] listaVeiculosCadastrados() throws Exception {
 
         String[][] aux = new String[listaVeiculos.size()][6];
@@ -81,13 +63,6 @@ public class Controlador {
 
     }
 
-    
-    
-    
-    
-    
-    
-    
     public void finalizarConta(Object placaVeiculo) throws Exception {
         // Altera o status para fechado e salva o registro.
         //Se valor da conta for zero retorna um erro.
@@ -115,14 +90,6 @@ public class Controlador {
         //Utilize o objeto DAO
     }
 
-    
-    
-    
-    
-    
-    
-    
-    
     public String calculoTipo(String placaVeiculo, MetricaCalculoEnum metrica) throws Exception {
 
         if (metrica.equals(metrica.DIARIA)) {
@@ -145,11 +112,6 @@ public class Controlador {
         return "deu ruim";
     }
 
-    
-    
-    
-    
-    
     private String automatico(String placaVeiculo) throws Exception {
         //fazer a verificação do automatico, comparando o periodo da conta inicial - conta.getInicio()
         //ele vai fazer a verificação e vai passar como parâmetro a métrica correspondente ao menor valor
@@ -161,25 +123,13 @@ public class Controlador {
 
         if (periodoInicial < 1) {
             return calculoTipo(placaVeiculo, MetricaCalculoEnum.UM_QUARTO_HORA);
-        } 
-        else if (periodoInicial >= 1 && periodoInicial < 12) {
+        } else if (periodoInicial >= 1 && periodoInicial < 12) {
             return calculoTipo(placaVeiculo, MetricaCalculoEnum.HORA);
-        } 
-        else {
+        } else {
             return calculoTipo(placaVeiculo, MetricaCalculoEnum.DIARIA);
         }
     }
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     public String calculaPermanencia(String placaVeiculo) throws Exception {
         //PESQUISA NA LISTA DE VEÍCULOS A PLACA CORRESPONTENTE.
         //PEGA A DATA DE INÍCIO MENOS A ATUAL
@@ -196,13 +146,6 @@ public class Controlador {
         return "123";
     }
 
-    
-    
-    
-    
-    
-    
-    
     public Veiculo retornaVeiculo(String placaVeiculo) {
 
         String placa;
@@ -216,25 +159,16 @@ public class Controlador {
         return null;
     }
 
-    
-    
-    
-    public ArrayList<String> carregaPlaca(){
-         ArrayList<String> aux = new ArrayList<>();
-        for(ContaVeiculo conta: listaVeiculos){
+    public ArrayList<String> carregaPlaca() {
+        ArrayList<String> aux = new ArrayList<>();
+        for (ContaVeiculo conta : listaVeiculos) {
             aux.add(conta.getVeiculo().getPlaca());
         }
-        
+
         return aux;
-        
+
     }
-    
-    
-    
-    
-    
-    
-    
+
     public ContaVeiculo retornaConta(String placaVeiculo) {
         String placa;
         for (ContaVeiculo conta : listaVeiculos) {
@@ -249,4 +183,3 @@ public class Controlador {
     }
 
 }
-
