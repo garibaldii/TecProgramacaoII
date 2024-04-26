@@ -4,7 +4,7 @@ package Model.Estacionamento;
 import java.io.Serializable;
 
 public class ContaVeiculo implements Serializable{
- 
+    private int id;
     private CalculoValor calculo;
     private Veiculo veiculo;
     private long inicio=0;
@@ -31,12 +31,21 @@ public class ContaVeiculo implements Serializable{
         this.calculo = calculo;
     }
     
+
+    
     public void setFim(long fim) {
         this.fim = fim;
     }
     public void setStatus(StatusConta status) {
         this.status = status;
     }    
+    
+    public void setId(int id){
+        this.id = id;
+    }
+    
+    
+    
     public StatusConta getStatus() {
         return status;
     }
@@ -55,6 +64,12 @@ public class ContaVeiculo implements Serializable{
     public long getFim() {
         return fim;
     }
+    
+        
+    public int getId(){
+        return this.id;
+    }
+    
      
     
     

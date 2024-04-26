@@ -25,12 +25,24 @@ public class Controlador {
 
     }
 
-    public void addContaVeiculo(String nome, String placa, TipoVeiculoEnum tipo) throws Exception {
-        //listaVeiculos.add(new ContaVeiculo(Calendar.getInstance().getTimeInMillis(), new Veiculo(nome, placa, tipo)));
-        listaVeiculos.add(new ContaVeiculo(Calendar.getInstance().getTimeInMillis() - (1000 * 60 * 60 * 2), new Veiculo(nome, placa, tipo), StatusConta.ABERTO));
+    public boolean taConectadoNoBanco() {
+        //se o veiculoDAO e contaveiculoDAO estiverem com uma conexao nula, é necessário 
+        if (contaVeiculoDAO.taConectado() && veiculoDAO.taConectado()) {
+            veiculoDAO.sincronizarTabelaVeiculos(listaVeiculos);
+            contaVeiculoDAO.sincronizarTabelaContas(listaVeiculos);
+            return true;
+        }
+        return false;
+    }
 
-        veiculoDAO.criarNovoRegistroVeiculo(new Veiculo(nome, placa, tipo));
-        contaVeiculoDAO.criarNovoRegistroConta(new ContaVeiculo(Calendar.getInstance().getTimeInMillis() - (1000 * 60 * 60 * 2), new Veiculo(nome, placa, tipo), StatusConta.ABERTO));
+    public void addContaVeiculo(String nome, String placa, TipoVeiculoEnum tipo) throws Exception {
+
+        if (taConectadoNoBanco()) {
+            veiculoDAO.criarNovoRegistroVeiculo(new Veiculo(nome, placa, tipo));
+            contaVeiculoDAO.criarNovoRegistroConta(new ContaVeiculo(Calendar.getInstance().getTimeInMillis() - (1000 * 60 * 60 * 2), new Veiculo(nome, placa, tipo), StatusConta.ABERTO));
+        }
+
+        listaVeiculos.add(new ContaVeiculo(Calendar.getInstance().getTimeInMillis() - (1000 * 60 * 60 * 2), new Veiculo(nome, placa, tipo), StatusConta.ABERTO));
 
     }
 
@@ -44,11 +56,17 @@ public class Controlador {
     }
 
     public List<ContaVeiculo> pegaContasCadastradasBD() {
-        List<ContaVeiculo> listaContaBD = contaVeiculoDAO.listarContas();
 
-        for (ContaVeiculo conta : listaContaBD) {
-            listaVeiculos.add(conta);
+        if (taConectadoNoBanco()) {
+
+            List<ContaVeiculo> listaContaBD = contaVeiculoDAO.listarContas();
+
+            for (ContaVeiculo conta : listaContaBD) {
+                listaVeiculos.add(conta);
+            }
+            return listaVeiculos;
         }
+
         return listaVeiculos;
     }
 
@@ -88,15 +106,14 @@ public class Controlador {
         for (ContaVeiculo conta : listaVeiculos) {
             placa = conta.getVeiculo().getPlaca();
 
-            // if(conta.valorConta().equals(0)){
-            // System.out.println("Erro");
-            //}
             if (placa.equals(placaVeiculo.toString())) {
                 conta.setStatus(StatusConta.FECHADO);
                 conta.setFim(Calendar.getInstance().getTimeInMillis());
             }
 
-            contaVeiculoDAO.atualizarContas((String) placaVeiculo);
+            if (taConectadoNoBanco()) {
+                contaVeiculoDAO.atualizarConta((String) placaVeiculo);
+            }
 
         }
 

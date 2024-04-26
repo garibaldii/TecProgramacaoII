@@ -1,18 +1,8 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Model.DAO;
 
 import Model.Estacionamento.ContaVeiculo;
 import Model.Estacionamento.TipoVeiculoEnum;
 import Model.Estacionamento.Veiculo;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -43,8 +33,14 @@ public class VeiculoDAO {
             String senha = "123";
             this.connection = DriverManager.getConnection(DATABASE_URL, usuario, senha);
         } catch (ClassNotFoundException | SQLException ex) {
-            Logger.getLogger(PersistenciaDados.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ContaVeiculoDAO.class.getName()).log(Level.SEVERE, null, ex);
+
         }
+    }
+
+    public boolean taConectado() {
+        return this.connection != null;
+
     }
 
     public boolean criarNovoRegistroVeiculo(Veiculo elemento) {
@@ -59,7 +55,7 @@ public class VeiculoDAO {
                 stmt.execute();
                 return true;
             } catch (SQLException ex) {
-                Logger.getLogger(PersistenciaDados.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(VeiculoDAO.class.getName()).log(Level.SEVERE, null, ex);
                 return false;
             }
         }
@@ -95,12 +91,12 @@ public class VeiculoDAO {
                 Veiculo veiculo = new Veiculo(resultado.getString("nome"), resultado.getString("placa"), TipoVeiculoEnum.valueOf(resultado.getString("tipo")));
 
                 if (veiculo.getPlaca().equals(placa)) {
-                    //if (veiculo.getPlaca().equals(placa){
+
                     return true;
                 }
             }
         } catch (SQLException ex) {
-            Logger.getLogger(PersistenciaDados.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(VeiculoDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
         return false;
     }
@@ -120,9 +116,19 @@ public class VeiculoDAO {
                 }
             }
         } catch (SQLException ex) {
-            Logger.getLogger(PersistenciaDados.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(VeiculoDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
+    }
+
+    public void sincronizarTabelaVeiculos(List<ContaVeiculo> contaVeiculoLocal) {
+        for (ContaVeiculo conta : contaVeiculoLocal) {
+            String placaDoVeiculoLista = conta.getVeiculo().getPlaca();
+
+            if (!placaDoVeiculoLista.equals(ehVeiculoCadastrado(placaDoVeiculoLista))) {
+                criarNovoRegistroVeiculo(conta.getVeiculo());
+            }
+        }
     }
 
 }
