@@ -1,0 +1,3 @@
+Classes_Jogo.Naipes
+Classes_Jogo.Cartas
+Classes_Jogo.NumerosCartas
