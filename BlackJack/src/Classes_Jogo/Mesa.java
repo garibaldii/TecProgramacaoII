@@ -14,25 +14,40 @@ package Classes_Jogo;
 //• O jogo acaba quando sobrar um jogador ou após um número arbitrário de rodadas.
 public class Mesa {
 
-    public static Jogador vencedor(Jogador jogador1, Jogador jogador2) {
-        System.out.println(jogador1.getNome() + " é um cu de burro");
-        System.out.println(jogador1.getSaldo());
-        return null;
-    }
-
     public static void main(String[] args) {
 
         Jogador matheus = new Jogador("Matheus");
         Jogador erick = new Jogador("Erick");
-        
-        
-        
-        new Thread(() -> { //a classe Thread implementa Runnable que possui apenas um método abstrato run(). então neste caso. 
+
+        Jogo jogo = new Jogo(matheus, erick);
+
+        Thread threadJogador1 = new Thread(() -> { //a classe Thread implementa Runnable que possui apenas um método abstrato run(). então neste caso. 
             //estamos sobreescrevendo o método run() através de uma lambda para adaptarmos a nossa necessidade.
 
-            Mesa.vencedor(matheus.jogar(), erick.jogar());
+            jogo.iniciar(matheus);
 
-        }).start();
+        });
+
+        Thread threadJogador2 = new Thread(() -> { //a classe Thread implementa Runnable que possui apenas um método abstrato run(). então neste caso. 
+            //estamos sobreescrevendo o método run() através de uma lambda para adaptarmos a nossa necessidade.
+
+            jogo.iniciar(erick);
+
+        });
+
+        threadJogador1.start();
+        threadJogador2.start();
+        
+        
+        try {
+            threadJogador1.join(); // Espera a thread do Matheus terminar
+            threadJogador2.join(); // Espera a thread do Erick terminar
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        
+        Jogador vencedor = jogo.vencedorRodada();
+        System.out.println("E o vencedor da rodada eh o " + vencedor.getNome());
 
     }
 
