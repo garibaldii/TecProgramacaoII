@@ -9,7 +9,11 @@ public class Jogador {
     private List<Cartas> listaMao;
     private int valorMao;
     private int saldo;
+    private int aposta;
 
+    
+    
+//Construtor
     public Jogador(String nome) {
         this.nome = nome;
         this.saldo = 100; //Todos os jogadores iniciam com 100 reais de saldo para apostar.
@@ -21,7 +25,7 @@ public class Jogador {
         this.listaMao.add(Baralho.getInstancia().pegarCarta());
     }
 
-//Model
+//Getters
     public String getNome() {
         return this.nome;
     }
@@ -38,16 +42,29 @@ public class Jogador {
         return this.saldo;
     }
 
-//public int getAposta(){
-//    return this.aposta;
-//}
-    
+    public int getAposta() {
+        return this.aposta;
+    }
+
+    //Setters  
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public void setListaMao(List<Cartas> listaMao) {
+        this.listaMao = listaMao;
+    }
+
     public void setValorMao(int valorMao) {
         this.valorMao = valorMao;
     }
 
     public void setSaldo(int novoSaldo) {
         this.saldo = novoSaldo;
+    }
+
+    public void setAposta(int novaAposta) {
+        this.aposta = novaAposta;
     }
 
 }

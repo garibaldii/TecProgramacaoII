@@ -14,69 +14,82 @@ public class Jogo {
         this.jogadorB = jogadorB;
     }
 
-    public Jogador iniciar(Jogador jogador) {
+    public void iniciarJogo(Jogador jogador) {
+        int saldo = jogador.getSaldo();
+
+        while (saldo > 0) {
+            jogarRodada(jogador);
+
+            Jogador vencedor = vencedorRodada();
+
+            // Verifica se o saldo de um jogador é menor ou igual a zero
+            if (jogadorA.getSaldo() <= 0 || jogadorB.getSaldo() <= 0) {
+                break;
+            }
+
+        }
+
+        //achar uma forma de atualizar o saldo conforme as rodadas são jogadas.
+    }
+
+    
+    
+    
+    public void jogarRodada(Jogador jogador) {
+
         apostar(jogador);
 
         while (jogador.getValorMao() < 21) {
+
             if (!continuarComprando(jogador)) {
+
                 break;
             }
+
         }
-
-        return null;
-    }
-
-    private boolean continuarComprando(Jogador jogador) {
-
-        if (EstourouLimite(jogador)) {
-            System.out.println(jogador.getNome() + " - Estourei, tomar no cu: " + jogador.getValorMao());
-            return false; //perdeu a vez
-        }
-
-        if (deveComprar(jogador)) {
-
-            if (EstourouLimite(jogador)) {
-                System.out.println(jogador.getNome() + " - Tomei no cu, estorei o limite dessa porra: " + jogador.getValorMao());
-                return false;
-            } else {
-                continuarComprando(jogador);
-            }
-            return false;
-        }
-        //o  que fazer? o jogador chegou em um ponto em que o limite nao estourou e a probabilidade de vir uma carta que estoure 
-        //é alta, ele não irá comprar. Ele teria que passar a vez. Como funciona?
-        System.out.println(jogador.getNome() + " - Vou manter, nao quero comprar e nao estourei, mao: " + jogador.getValorMao());
-
-        return false;
+        atualizaSaldo(jogador);
 
     }
 
-    private void apostar(Jogador jogador) {
+    //1º Etapa - aposta
+    private int apostar(Jogador jogador) {
         Random valorAleatorio = new Random();
-        int aposta = valorAleatorio.nextInt(1, 10);
+        jogador.setAposta(valorAleatorio.nextInt(1, 10));
+        int aposta = jogador.getAposta();
 
         if (jogador.getSaldo() > 0) {
 
             if (jogador.getSaldo() - aposta < 0) {
-                aposta = valorAleatorio.nextInt(1, aposta);
+                aposta = valorAleatorio.nextInt(1, jogador.getSaldo()); //ou teto = aposta;
 
                 if (jogador.getSaldo() == aposta) {
-                    System.out.println("All win, apostei tudo que tenho! R$" + aposta);
-                    return;
+                    return aposta;
                 }
-
-                System.out.println("Aposto R$" + aposta);
-
+                return aposta;
             }
-
-            jogador.setSaldo(jogador.getSaldo() - aposta);
-
-            System.out.println(jogador.getNome() + " - Aposto R$" + aposta);
-
-        } else {
-
-            sair();
+            return aposta;
         }
+
+        return 0;
+
+    }
+
+    //2º Etapa - #comprar carta, #verificar se o limite estourou # calcular a porcentagem de acerto na proxima compra
+    private boolean continuarComprando(Jogador jogador) {
+
+        if (EstourouLimite(jogador)) {
+            System.out.println(jogador.getNome() + " - Estourou! Pontuacao: " + jogador.getValorMao() + " perdeu aposta R$ " + jogador.getAposta());
+            return false; //perdeu a vez
+        }
+
+        if (deveComprar(jogador)) {
+            jogador.getListaMao().add(Baralho.getInstancia().pegarCarta());
+            return true;
+
+        }
+
+        System.out.println(jogador.getNome() + " - Nao vou mais comprar, Pontuacao:  " + jogador.getValorMao() + " aposta  R$" + jogador.getAposta());
+        return false;
 
     }
 
@@ -90,18 +103,15 @@ public class Jogo {
         }
         jogador.setValorMao(aux);
 
-        if (jogador.getValorMao() > 21) {
-            return true;
-        }
+        return jogador.getValorMao() > 21 ? true : false;
 
-        return false;
     }
 
     private boolean deveComprar(Jogador jogador) {
         int cartasAceitas = 0;
 
         if (jogador.getValorMao() == 21) {
-            System.out.println(jogador.getNome() + " - 21 caralho!!");
+            System.out.println(jogador.getNome() + " - 21!!");
             return false;
         }
 
@@ -112,33 +122,56 @@ public class Jogo {
             if (carta.numero.getValor() + jogador.getValorMao() <= 21) {
                 cartasAceitas++;
             }
+
         }
         double probabilidade = (double) cartasAceitas / cartasRestantes;
 
-        if (probabilidade >= 0.30) {
-            jogador.getListaMao().add(Baralho.getInstancia().pegarCarta());
-            return true;
-
-        }
-
-        return false;
+        return probabilidade >= 0.3;
 
     }
 
+    //3º Etapa #define o vencedor da rodada , #faz a distribuicao das apostas
     public Jogador vencedorRodada() {
         int pontuacaoJogadorA = jogadorA.getValorMao();
         int pontuacaoJogadorB = jogadorB.getValorMao();
 
-        return (pontuacaoJogadorA > 21 && pontuacaoJogadorB <= 21) ? jogadorB
-                : (pontuacaoJogadorB > 21 && pontuacaoJogadorA <= 21) ? jogadorA
-                        : (pontuacaoJogadorA > pontuacaoJogadorB) ? jogadorA
-                                : (pontuacaoJogadorB > pontuacaoJogadorA) ? jogadorB
-                                        : null; // Empate
+        if (pontuacaoJogadorA > 21 && pontuacaoJogadorB > 21) {
+            return null;
+        } else if (pontuacaoJogadorA > 21) {
+            distribuirApostas(jogadorB, jogadorA);
+            return jogadorB;
+        } else if (pontuacaoJogadorB > 21) {
+            distribuirApostas(jogadorA, jogadorB);
+            return jogadorA;
+        } else {
+            // Nenhum jogador estourou, então comparamos as pontuações
+            if (pontuacaoJogadorA > pontuacaoJogadorB) {
+                distribuirApostas(jogadorA, jogadorB);
+                return jogadorA;
+            } else if (pontuacaoJogadorB > pontuacaoJogadorA) {
+                distribuirApostas(jogadorB, jogadorA);
+                return jogadorB;
+            } else {
+                return null; // Empate
+            }
+        }
     }
 
-    private void sair() {
-        System.out.println("Meu saldo acabou : /");
-        //lógica para sair do jogo
+    public void distribuirApostas(Jogador vencedor, Jogador perdedor) {
+        //]jogador perdedor tem o saldo - aposta e o vencedor tem a aposta acrescida ao saldo.
+        vencedor.setSaldo(vencedor.getSaldo() + vencedor.getAposta());
+        perdedor.setSaldo(perdedor.getSaldo() - perdedor.getAposta());
+        System.out.println(vencedor.getNome() + " Saldo jogador Vencedor: " + vencedor.getSaldo());
+        System.out.println(perdedor.getNome() + " Saldo jogador Perdedor: " + perdedor.getSaldo());
+
     }
 
+    public void atualizaSaldo(Jogador jogador) {
+        Jogador vencedor = vencedorRodada();
+        if (vencedor != null) {
+            Jogador perdedor = (vencedor == jogadorA) ? jogadorB : jogadorA;
+
+            distribuirApostas(vencedor, perdedor);
+        }
+    }
 }
