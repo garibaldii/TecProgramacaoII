@@ -3,11 +3,13 @@ package Classes_Jogo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.Semaphore;
 
 public class Jogo {
 
     private Jogador jogadorA;
     private Jogador jogadorB;
+
 
     public Jogo(Jogador jogadorA, Jogador jogadorB) {
         this.jogadorA = jogadorA;
@@ -15,27 +17,24 @@ public class Jogo {
     }
 
     public void iniciarJogo(Jogador jogador) {
+
         int saldo = jogador.getSaldo();
 
         while (saldo > 0) {
             jogarRodada(jogador);
+            pegarNovasCartas(jogador);
+            dizerVencedorConsole();
 
-            Jogador vencedor = vencedorRodada();
-
-            // Verifica se o saldo de um jogador é menor ou igual a zero
             if (jogadorA.getSaldo() <= 0 || jogadorB.getSaldo() <= 0) {
                 break;
             }
 
+
         }
 
-        //achar uma forma de atualizar o saldo conforme as rodadas são jogadas.
     }
 
-    
-    
-    
-    public void jogarRodada(Jogador jogador) {
+    public  void jogarRodada(Jogador jogador) {
 
         apostar(jogador);
 
@@ -47,7 +46,6 @@ public class Jogo {
             }
 
         }
-        atualizaSaldo(jogador);
 
     }
 
@@ -62,10 +60,6 @@ public class Jogo {
             if (jogador.getSaldo() - aposta < 0) {
                 aposta = valorAleatorio.nextInt(1, jogador.getSaldo()); //ou teto = aposta;
 
-                if (jogador.getSaldo() == aposta) {
-                    return aposta;
-                }
-                return aposta;
             }
             return aposta;
         }
@@ -136,7 +130,7 @@ public class Jogo {
         int pontuacaoJogadorB = jogadorB.getValorMao();
 
         if (pontuacaoJogadorA > 21 && pontuacaoJogadorB > 21) {
-            return null;
+            return null; // Empate
         } else if (pontuacaoJogadorA > 21) {
             distribuirApostas(jogadorB, jogadorA);
             return jogadorB;
@@ -157,21 +151,25 @@ public class Jogo {
         }
     }
 
-    public void distribuirApostas(Jogador vencedor, Jogador perdedor) {
-        //]jogador perdedor tem o saldo - aposta e o vencedor tem a aposta acrescida ao saldo.
+    private void distribuirApostas(Jogador vencedor, Jogador perdedor) {
         vencedor.setSaldo(vencedor.getSaldo() + vencedor.getAposta());
         perdedor.setSaldo(perdedor.getSaldo() - perdedor.getAposta());
-        System.out.println(vencedor.getNome() + " Saldo jogador Vencedor: " + vencedor.getSaldo());
-        System.out.println(perdedor.getNome() + " Saldo jogador Perdedor: " + perdedor.getSaldo());
+    }
+
+    //4º Etapa #Limpar a mao do jogador e distribuir novas cartas.
+    private synchronized void pegarNovasCartas(Jogador jogador) {
+
+        jogador.setValorMao(0); //atualiza o valor da mao para 0, pois sao novas cartas
+        jogador.getListaMao().clear(); //limpa as cartas 
+        jogador.getListaMao().add(Baralho.getInstancia().pegarCarta());
+        jogador.getListaMao().add(Baralho.getInstancia().pegarCarta());
 
     }
 
-    public void atualizaSaldo(Jogador jogador) {
+//5º Etapa #Retorna no console o vencedor da rodada
+    public synchronized void dizerVencedorConsole() {
         Jogador vencedor = vencedorRodada();
-        if (vencedor != null) {
-            Jogador perdedor = (vencedor == jogadorA) ? jogadorB : jogadorA;
-
-            distribuirApostas(vencedor, perdedor);
-        }
+        System.out.println(vencedor == jogadorA ? jogadorA.getNome() + " eh o vencedor da rodada. SALDO: R$ " + jogadorA.getSaldo() : jogadorB.getNome() + " eh o vencedor da rodada. SALDO: R$" + jogadorB.getSaldo());
     }
+
 }
