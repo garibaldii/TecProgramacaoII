@@ -24,22 +24,22 @@ public class Mesa {
 
         Jogo jogo = new Jogo(matheus, erick);
 
-
         Thread threadJogador1 = new Thread(() -> { //a classe Thread implementa Runnable que possui apenas um método abstrato run(). então neste caso. 
             //estamos sobreescrevendo o método run() através de uma lambda para adaptarmos a nossa necessidade.
 
-            jogo.iniciarJogo(matheus);
+            jogo.jogarRodada(matheus);
 
         });
 
         Thread threadJogador2 = new Thread(() -> {
 
-            jogo.iniciarJogo(erick);
+            jogo.jogarRodada(erick);
 
         });
-
-        threadJogador2.start();
+        
         threadJogador1.start();
+        threadJogador2.start();
+
 
         try {
             threadJogador1.join();
@@ -47,8 +47,8 @@ public class Mesa {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
+        
+        
     }
 
 }

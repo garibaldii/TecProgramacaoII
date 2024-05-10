@@ -3,13 +3,12 @@ package Classes_Jogo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.Semaphore;
+
 
 public class Jogo {
 
     private Jogador jogadorA;
     private Jogador jogadorB;
-
 
     public Jogo(Jogador jogadorA, Jogador jogadorB) {
         this.jogadorA = jogadorA;
@@ -22,19 +21,21 @@ public class Jogo {
 
         while (saldo > 0) {
             jogarRodada(jogador);
-            pegarNovasCartas(jogador);
             dizerVencedorConsole();
+            pegarNovasCartas(jogador);
+
+            Baralho.resetaBaralho();
 
             if (jogadorA.getSaldo() <= 0 || jogadorB.getSaldo() <= 0) {
                 break;
             }
 
-
         }
 
     }
 
-    public  void jogarRodada(Jogador jogador) {
+    public void jogarRodada(Jogador jogador) {
+        System.out.println("Nova rodada!" + jogador.getNome());
 
         apostar(jogador);
 
@@ -46,7 +47,8 @@ public class Jogo {
             }
 
         }
-
+        System.out.println("FIM da rodada do jogador " + jogador.getNome());
+        dizerVencedorConsole();
     }
 
     //1º Etapa - aposta
@@ -58,7 +60,7 @@ public class Jogo {
         if (jogador.getSaldo() > 0) {
 
             if (jogador.getSaldo() - aposta < 0) {
-                aposta = valorAleatorio.nextInt(1, jogador.getSaldo()); //ou teto = aposta;
+                aposta = valorAleatorio.nextInt(1, aposta); //ou teto = aposta;
 
             }
             return aposta;
@@ -125,7 +127,7 @@ public class Jogo {
     }
 
     //3º Etapa #define o vencedor da rodada , #faz a distribuicao das apostas
-    public Jogador vencedorRodada() {
+    public Jogador vencedorRodada() { //duas threads sendo executadas 2x, sendo assim, duplicando o resultado da aposta :/ como arrumar?
         int pontuacaoJogadorA = jogadorA.getValorMao();
         int pontuacaoJogadorB = jogadorB.getValorMao();
 
@@ -169,7 +171,15 @@ public class Jogo {
 //5º Etapa #Retorna no console o vencedor da rodada
     public synchronized void dizerVencedorConsole() {
         Jogador vencedor = vencedorRodada();
-        System.out.println(vencedor == jogadorA ? jogadorA.getNome() + " eh o vencedor da rodada. SALDO: R$ " + jogadorA.getSaldo() : jogadorB.getNome() + " eh o vencedor da rodada. SALDO: R$" + jogadorB.getSaldo());
+        if(vencedor == jogadorA){
+            System.out.println("Vencedor foi o " + jogadorA.getNome() + "SALDO R$" + jogadorA.getSaldo());
+        }
+        else if(vencedor == jogadorB){
+        System.out.println("Vencedor foi o " + jogadorB.getNome() + "SALDO R$" + jogadorA.getSaldo());
+    }
+        else{
+            System.out.println("EMPATE!");
+        }
     }
 
 }
